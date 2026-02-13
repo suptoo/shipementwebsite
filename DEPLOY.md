@@ -4,22 +4,33 @@
 
 ### 1. Database Setup
 
-Run the SQL files in order:
+**Single SQL File - Run this in Supabase SQL Editor:**
 
 ```bash
-# 1. Setup database schema
-psql your_database_url < database-setup.sql
-
-# 2. Seed initial data
-psql your_database_url < 2_seed.sql
+# Use the complete database file (includes schema + sample data)
+complete-database.sql
 ```
 
-Or in Supabase Dashboard:
-1. Go to SQL Editor
-2. Copy contents of `database-setup.sql` and run
-3. Then copy contents of `2_seed.sql` and run
+**In Supabase Dashboard:**
+1. Go to [SQL Editor](https://app.supabase.com/project/rgzvlxhimentlidcdvtp/sql)
+2. Click **New Query**
+3. Copy entire contents of `complete-database.sql`
+4. Click **Run** or press `Ctrl+Enter`
+5. Wait for completion (takes 10-30 seconds)
 
-### 2. Environment Configuration
+✅ This creates all tables, triggers, functions, AND sample products in one run!
+
+### 2. Enable Google Sign-In (Optional but Recommended)
+
+See [GOOGLE_AUTH_SETUP.md](GOOGLE_AUTH_SETUP.md) for complete instructions.
+
+**Quick steps:**
+1. Create OAuth app in Google Cloud Console
+2. Get Client ID and Client Secret
+3. Add to Supabase → Authentication → Providers → Google
+4. Done! Google Sign-In is enabled
+
+### 3. Environment Configuration
 
 ```bash
 # Copy the example file

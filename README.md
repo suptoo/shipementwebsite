@@ -76,8 +76,52 @@ A full-featured, production-ready multi-vendor e-commerce platform built with Re
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/bongoportus.git
-cd bongoportus
+git clone https://github.com/suptoo/shipementwebsite.git
+cd shipementwebsite
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment
+
+```bash
+cp .env.example .env
+# Edit .env with your Supabase credentials
+```
+
+Your `.env` should look like:
+```env
+VITE_SUPABASE_URL=https://rgzvlxhimentlidcdvtp.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
+### 4. Setup Database
+
+Go to [Supabase SQL Editor](https://app.supabase.com/project/rgzvlxhimentlidcdvtp/sql) and run:
+
+📄 **`complete-database.sql`** - Single file that sets up everything!
+
+This creates:
+- All tables (products, orders, users, etc.)
+- Sample products (60 items across categories)
+- Default admin user
+- Categories and brands
+
+### 5. Enable Google Sign-In (Optional)
+
+See **[GOOGLE_AUTH_SETUP.md](GOOGLE_AUTH_SETUP.md)** for detailed instructions.
+
+### 6. Run Development Server
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:5173` 🎉
 ```
 
 ### 2. Install Dependencies
