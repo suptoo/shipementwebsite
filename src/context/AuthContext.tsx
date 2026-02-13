@@ -61,12 +61,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) throw error;
-      
+
       // Force admin role for specific email
       if (data && data.email === 'umorfaruksupto@gmail.com') {
         data.role = 'admin';
       }
-      
+
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -132,11 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setProfile(null);
       setSession(null);
-      
+
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       // Force reload to clear any cached data
       window.location.href = '/login';
     } catch (error) {
