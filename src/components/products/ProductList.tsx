@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Product, ProductFilters } from '../../types';
+import { Product, ProductFilters, Category } from '../../types';
 import { productService } from '../../services/productService';
 import { ProductCard } from './ProductCard';
 import { Loader2 } from 'lucide-react';
@@ -11,7 +11,7 @@ interface ProductListProps {
 }
 
 // Demo products with placeholder images
-const demoProducts: Omit<Product, 'id'>[] = [
+const demoProducts: Array<Omit<Product, 'id' | 'sku' | 'category'> & { category?: Pick<Category, 'id' | 'name' | 'slug'> }> = [
   // Electronics (5 products)
   {
     seller_id: 'demo', shop_id: 'demo', category_id: 'cat-1', brand_id: null,
@@ -447,6 +447,15 @@ export const ProductList: React.FC<ProductListProps> = ({
     return filtered.slice(0, count).map((p, i) => ({
       ...p,
       id: `demo-${p.slug}-${i}`,
+      sku: null,
+      category: p.category ? {
+        ...p.category,
+        parent_id: null,
+        icon_url: null,
+        image_url: null,
+        display_order: 0,
+        is_active: true,
+      } as Category : undefined,
     })) as Product[];
   };
 

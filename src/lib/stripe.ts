@@ -1,6 +1,6 @@
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SW3Uz9PPh298IzgrsZdptzlVaEMGZkepdF8flAMFqdhk75FV1KEgUflIqurFxMfjygcst3H0YgiG6tNGBoYhFo800AQ29C25U';
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_51SW3Uz9PPh298IzgrsZdptzlVaEMGZkepdF8flAMFqdhk75FV1KEgUflIqurFxMfjygcst3H0YgiG6tNGBoYhFo800AQ29C25U';
 
 let stripePromise: Promise<Stripe | null>;
 

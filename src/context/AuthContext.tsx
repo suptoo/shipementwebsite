@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types';
-import { ensureProfileRecord } from '../lib/profileUtils';
+import { ensureProfileRecord, isAdminEmail } from '../lib/profileUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +12,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -62,8 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // Force admin role for specific email
-      if (data && data.email === 'umorfaruksupto@gmail.com') {
+      // Force admin role for configured admin emails
+      if (data && isAdminEmail(data.email)) {
         data.role = 'admin';
       }
 
@@ -126,6 +127,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
+  const signInWithFacebook = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+        scopes: 'email,public_profile',
+      },
+    });
+
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     try {
       // Clear local state first
@@ -155,6 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signInWithGoogle,
+        signInWithFacebook,
         signOut,
       }}
     >
