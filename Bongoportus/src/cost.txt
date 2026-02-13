@@ -1,0 +1,45 @@
+1. Website hosting cost: frontend Vercel (Pro Plan)
+
+25 USD × 12 = 300 USD
+
+2. Web hosting backend in Supabase + realtime chat
+
+25 USD × 12 = 300 USD
+Bandwidth cost = 100 USD
+Total = 400 USD
+
+3. NID verification cost
+
+500 USD
+
+4. SMS Cost
+
+100 USD
+
+5. Playstore upload cost
+
+Play Store = 25 USD
+App backend cost (Firebase/Vercel/Railway) = 50 USD
+Total = 75 USD
+
+6. Total overall operational cost (1 year)
+
+300 + 400 + 500 + 100 + 75 = 1,375 USD
+
+7. Development cost
+
+Website — 1000 USD
+App — 500 USD (shared web backend)
+Total development cost = 1,500 USD
+
+8. AI integration (AI API cost)
+
+500 USD
+
+Final Total (1 Year)
+
+Operational cost = 1,375 USD
+Development cost = 1,500 USD
+AI API cost = 500 USD
+
+Grand Total = 1,375 + 1,500 + 500 = 3,375 USD
