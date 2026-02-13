@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LogIn, UserPlus, Loader2, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserPlus, Loader2, Eye, EyeOff, CheckCircle, Mail } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export const Login: React.FC = () => {
   const { signIn, signUp, signInWithGoogle, signInWithFacebook } = useAuth();
@@ -10,23 +11,85 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    // Client-side validation
+    if (isSignUp && !fullName.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (!email.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
 
     setLoading(true);
 
     try {
       if (isSignUp) {
         await signUp(email, password, fullName);
-        alert('Sign up successful! Please check your email to confirm your account.');
+        setSuccess('Account created successfully! You can now sign in, or check your email to verify your account.');
+        // Switch to sign-in mode after successful signup
+        setTimeout(() => {
+          setIsSignUp(false);
+          setPassword('');
+          setSuccess('');
+        }, 4000);
       } else {
         await signIn(email, password);
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      const msg = err.message || 'An error occurred';
+      // Provide user-friendly error messages
+      if (msg.includes('Invalid login credentials')) {
+        setError('Incorrect email or password. Please try again.');
+      } else if (msg.includes('Email not confirmed')) {
+        setError('Please confirm your email first. Check your inbox for a verification link.');
+      } else if (msg.includes('already registered') || msg.includes('already exists')) {
+        setError('This email is already registered. Please sign in instead.');
+        setIsSignUp(false);
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        setError('Too many attempts. Please wait a moment and try again.');
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!forgotEmail.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+      if (error) throw error;
+      setSuccess('Password reset link sent! Check your email inbox.');
+      setTimeout(() => setShowForgotPassword(false), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email.');
     } finally {
       setLoading(false);
     }
@@ -63,8 +126,10 @@ export const Login: React.FC = () => {
             onClick={() => {
               setIsSignUp(false);
               setError('');
+              setSuccess('');
+              setShowForgotPassword(false);
             }}
-            className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all duration-300 ${!isSignUp
+            className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all duration-300 ${!isSignUp && !showForgotPassword
               ? 'bg-white text-blue-600 shadow-lg scale-[1.02]'
               : 'text-gray-600 hover:text-gray-900'
               }`}
@@ -76,6 +141,8 @@ export const Login: React.FC = () => {
             onClick={() => {
               setIsSignUp(true);
               setError('');
+              setSuccess('');
+              setShowForgotPassword(false);
             }}
             className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all duration-300 ${isSignUp
               ? 'bg-white text-blue-600 shadow-lg scale-[1.02]'
@@ -87,6 +154,61 @@ export const Login: React.FC = () => {
           </button>
         </div>
 
+        {/* Forgot Password Form */}
+        {showForgotPassword ? (
+          <form onSubmit={handleForgotPassword} className="space-y-5">
+            <div className="text-center mb-2">
+              <Mail className="w-10 h-10 text-blue-500 mx-auto mb-2" />
+              <p className="text-gray-600 text-sm">Enter your email and we'll send you a password reset link.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+              <input
+                type="email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                {success}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white py-4 px-4 rounded-xl font-bold text-lg hover:from-blue-800 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin w-5 h-5 mr-2" />
+                  Sending...
+                </>
+              ) : (
+                'Send Reset Link'
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setShowForgotPassword(false); setError(''); setSuccess(''); }}
+              className="w-full text-blue-600 hover:text-blue-800 font-medium text-sm py-2"
+            >
+              ← Back to Sign In
+            </button>
+          </form>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           {isSignUp && (
             <div className="animate-in fade-in duration-300">
@@ -146,6 +268,13 @@ export const Login: React.FC = () => {
             </div>
           )}
 
+          {success && (
+            <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-200 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              {success}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -162,7 +291,26 @@ export const Login: React.FC = () => {
               'Sign In'
             )}
           </button>
+
+          {/* Forgot Password */}
+          {!isSignUp && (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => { setShowForgotPassword(true); setError(''); setSuccess(''); setForgotEmail(email); }}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+              >
+                Forgot your password?
+              </button>
+            </div>
+          )}
+
+          {/* Password hint for signup */}
+          {isSignUp && (
+            <p className="text-xs text-gray-400 text-center">Password must be at least 6 characters</p>
+          )}
         </form>
+        )}
 
         {/* Divider */}
         <div className="relative my-6">

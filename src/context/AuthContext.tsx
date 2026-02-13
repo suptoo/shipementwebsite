@@ -61,7 +61,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If profiles table doesn't exist or row not found, create a basic profile from user data
+        if (error.code === 'PGRST116' || error.code === '42P01') {
+          // No profile row found — try to create one
+          const currentUser = (await supabase.auth.getUser()).data.user;
+          if (currentUser) {
+            await ensureProfileRecord(currentUser);
+            // Retry fetch
+            const { data: retryData } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single();
+            if (retryData) {
+              if (isAdminEmail(retryData.email)) retryData.role = 'admin';
+              setProfile(retryData);
+              return;
+            }
+          }
+          // Fallback: create a client-side profile from auth user
+          const { data: { user: authUser } } = await supabase.auth.getUser();
+          if (authUser) {
+            setProfile({
+              id: authUser.id,
+              email: authUser.email ?? '',
+              full_name: authUser.user_metadata?.full_name ?? null,
+              phone: null,
+              avatar_url: authUser.user_metadata?.avatar_url ?? null,
+              role: isAdminEmail(authUser.email) ? 'admin' : 'user',
+              is_verified: false,
+              is_blocked: false,
+              created_at: authUser.created_at,
+            });
+          }
+          return;
+        }
+        throw error;
+      }
 
       // Force admin role for configured admin emails
       if (data && isAdminEmail(data.email)) {
@@ -96,6 +133,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (data.user) {
       await ensureProfileRecord(data.user);
+
+      // If Supabase auto-confirms (no email verification required),
+      // the session will exist — user is logged in immediately
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+        await fetchProfile(data.user.id);
+      }
     }
   };
 
