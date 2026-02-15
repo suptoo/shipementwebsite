@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
@@ -16,14 +16,48 @@ const Messages = lazy(() => import('./pages/Messages').then(m => ({ default: m.M
 const Checkout = lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
 const SellerRegistration = lazy(() => import('./pages/SellerRegistration').then(m => ({ default: m.SellerRegistration })));
 
+// App-style branded splash screen
 const LoadingScreen: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600 font-medium">Loading...</p>
+  <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 relative overflow-hidden">
+    {/* Animated background circles */}
+    <div className="absolute w-72 h-72 bg-white/5 rounded-full -top-20 -left-20 animate-pulse"></div>
+    <div className="absolute w-96 h-96 bg-white/5 rounded-full -bottom-32 -right-20 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+    <div className="text-center z-10">
+      <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl animate-bounce" style={{ animationDuration: '2s' }}>
+        <span className="text-4xl">🛒</span>
+      </div>
+      <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Bongoportus</h1>
+      <p className="text-white/60 text-sm font-medium mb-8">Your Marketplace</p>
+      <div className="flex gap-1.5 justify-center">
+        <div className="w-2 h-2 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+        <div className="w-2 h-2 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+        <div className="w-2 h-2 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+      </div>
     </div>
   </div>
 );
+
+// Scroll to top on route change + page transition wrapper
+const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Trigger page-enter animation
+    if (mainRef.current) {
+      mainRef.current.classList.remove('page-enter-active');
+      void mainRef.current.offsetWidth; // force reflow
+      mainRef.current.classList.add('page-enter-active');
+    }
+  }, [location.pathname]);
+
+  return (
+    <div ref={mainRef} className="page-enter">
+      {children}
+    </div>
+  );
+};
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -64,62 +98,67 @@ const AppContent: React.FC = () => {
       <Navbar />
       <main className="flex-grow">
         <Suspense fallback={<LoadingScreen />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/become-seller"
-              element={
-                <ProtectedRoute>
-                  <SellerRegistration />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/orders"
-              element={
-                <AdminRoute>
-                  <AdminOrders />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/inbox"
-              element={
-                <ProtectedRoute>
-                  <Inbox />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/become-seller"
+                element={
+                  <ProtectedRoute>
+                    <SellerRegistration />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <AdminRoute>
+                    <AdminOrders />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/inbox"
+                element={
+                  <ProtectedRoute>
+                    <Inbox />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute>
+                    <Messages />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </PageTransition>
         </Suspense>
       </main>
-      <Footer />
+      {/* Hide footer on mobile - bottom nav replaces it */}
+      <div className="hidden md:block">
+        <Footer />
+      </div>
       {user && <SupportChatbot />}
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { 
-  MessageCircle, Send, Clock, CheckCircle2, User, Shield, 
+import {
+  MessageCircle, Send, Clock, CheckCircle2, User, Shield,
   Search, Filter, Archive, Trash2, Star, MoreVertical,
   ChevronRight, Package, Loader2, RefreshCw, Bell, BellOff,
   Check, CheckCheck, AlertCircle, X, Sparkles
@@ -55,7 +55,7 @@ export const Inbox: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'open' | 'closed'>('all');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('connecting');
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const channelRef = useRef<any>(null);
@@ -102,9 +102,9 @@ export const Inbox: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       const inquiryIds = (data || []).map(i => i.id);
-      
+
       if (inquiryIds.length === 0) {
         setInquiries([]);
         setLoading(false);
@@ -187,7 +187,7 @@ export const Inbox: React.FC = () => {
         .neq('sender_id', user?.id);
 
       // Update unread count in inquiries
-      setInquiries(prev => prev.map(inq => 
+      setInquiries(prev => prev.map(inq =>
         inq.id === inquiryId ? { ...inq, unread_count: 0 } : inq
       ));
     } catch (error) {
@@ -218,7 +218,7 @@ export const Inbox: React.FC = () => {
             });
 
             // Update last message in inquiries
-            setInquiries(prev => prev.map(inq => 
+            setInquiries(prev => prev.map(inq =>
               inq.id === inquiryId ? { ...inq, last_message: fullMessage.content } : inq
             ));
 
@@ -264,7 +264,7 @@ export const Inbox: React.FC = () => {
 
     try {
       await ensureProfileRecord(user);
-      
+
       const { data, error } = await supabase
         .from('messages')
         .insert({ inquiry_id: selectedInquiry, sender_id: user.id, content: messageContent })
@@ -274,9 +274,9 @@ export const Inbox: React.FC = () => {
       if (error) throw error;
 
       setMessages(prev => prev.map(m => m.tempId === tempId ? { ...m, id: data.id, status: 'sent' as const } : m));
-      
+
       // Update last message in inquiries
-      setInquiries(prev => prev.map(inq => 
+      setInquiries(prev => prev.map(inq =>
         inq.id === selectedInquiry ? { ...inq, last_message: messageContent } : inq
       ));
     } catch (error: any) {
@@ -315,7 +315,7 @@ export const Inbox: React.FC = () => {
   };
 
   const filteredInquiries = inquiries.filter(inquiry => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       inquiry.survey_amount.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.product?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || inquiry.status === filterStatus;
@@ -362,8 +362,8 @@ export const Inbox: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-16">
-      <div className="h-[calc(100vh-64px)] flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] flex">
         {/* Sidebar - Inquiry List */}
         <div className={`${showMobileChat ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-96 bg-white border-r border-slate-200 shadow-sm`}>
           {/* Header */}
@@ -404,11 +404,10 @@ export const Inbox: React.FC = () => {
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`flex-1 py-2.5 text-sm font-semibold transition-all ${
-                  filterStatus === status 
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white' 
+                className={`flex-1 py-2.5 text-sm font-semibold transition-all ${filterStatus === status
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
@@ -424,9 +423,8 @@ export const Inbox: React.FC = () => {
                   setSelectedInquiry(inquiry.id);
                   setShowMobileChat(true);
                 }}
-                className={`w-full text-left p-4 border-b border-slate-100 hover:bg-slate-50 transition-all ${
-                  selectedInquiry === inquiry.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                }`}
+                className={`w-full text-left p-4 border-b border-slate-100 hover:bg-slate-50 transition-all ${selectedInquiry === inquiry.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   {/* Product Image or Icon */}
@@ -443,17 +441,16 @@ export const Inbox: React.FC = () => {
                         {formatDate(inquiry.created_at)}
                       </span>
                     </div>
-                    
+
                     <p className="text-sm text-slate-600 truncate mb-1">
                       {inquiry.last_message || inquiry.survey_amount}
                     </p>
 
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        inquiry.status === 'open' 
-                          ? 'bg-green-100 text-green-700' 
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${inquiry.status === 'open'
+                          ? 'bg-green-100 text-green-700'
                           : 'bg-slate-100 text-slate-600'
-                      }`}>
+                        }`}>
                         {inquiry.status === 'open' ? '● Active' : 'Closed'}
                       </span>
                       {(inquiry.unread_count || 0) > 0 && (
@@ -479,7 +476,7 @@ export const Inbox: React.FC = () => {
               <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <button 
+                    <button
                       onClick={() => setShowMobileChat(false)}
                       className="lg:hidden p-2 hover:bg-white/10 rounded-lg"
                     >
@@ -498,23 +495,20 @@ export const Inbox: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                      connectionStatus === 'connected' ? 'bg-green-500/20 text-green-100' 
-                      : connectionStatus === 'connecting' ? 'bg-yellow-500/20 text-yellow-100'
-                      : 'bg-red-500/20 text-red-100'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${
-                        connectionStatus === 'connected' ? 'bg-green-400 animate-pulse' 
-                        : connectionStatus === 'connecting' ? 'bg-yellow-400'
-                        : 'bg-red-400'
-                      }`} />
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-green-500/20 text-green-100'
+                        : connectionStatus === 'connecting' ? 'bg-yellow-500/20 text-yellow-100'
+                          : 'bg-red-500/20 text-red-100'
+                      }`}>
+                      <div className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-green-400 animate-pulse'
+                          : connectionStatus === 'connecting' ? 'bg-yellow-400'
+                            : 'bg-red-400'
+                        }`} />
                       {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting' : 'Offline'}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      currentInquiry.status === 'open' 
-                        ? 'bg-white/20 text-white' 
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${currentInquiry.status === 'open'
+                        ? 'bg-white/20 text-white'
                         : 'bg-slate-500/30 text-slate-200'
-                    }`}>
+                      }`}>
                       {currentInquiry.status === 'open' ? '● Active' : 'Closed'}
                     </span>
                   </div>
@@ -536,7 +530,7 @@ export const Inbox: React.FC = () => {
                     messages.map((message) => {
                       const isOwn = message.sender_id === user?.id;
                       const isAdmin = message.sender?.role === 'admin';
-                      
+
                       return (
                         <div key={message.id || message.tempId} className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
                           {/* Avatar */}
@@ -544,11 +538,10 @@ export const Inbox: React.FC = () => {
                             {message.sender?.avatar_url ? (
                               <img src={message.sender.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-md" />
                             ) : (
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                                isAdmin ? 'bg-gradient-to-br from-purple-500 to-indigo-600' 
-                                : isOwn ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
-                                : 'bg-gradient-to-br from-slate-400 to-slate-500'
-                              }`}>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${isAdmin ? 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                                  : isOwn ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                                    : 'bg-gradient-to-br from-slate-400 to-slate-500'
+                                }`}>
                                 {isAdmin ? <Shield className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
                               </div>
                             )}
@@ -565,11 +558,10 @@ export const Inbox: React.FC = () => {
                               )}
                             </div>
 
-                            <div className={`relative rounded-2xl px-4 py-3 shadow-sm ${
-                              isOwn ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-sm'
-                              : isAdmin ? 'bg-gradient-to-br from-purple-50 to-indigo-50 text-slate-800 border border-purple-200 rounded-tl-sm'
-                              : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm'
-                            } ${message.status === 'failed' ? 'opacity-60' : ''}`}>
+                            <div className={`relative rounded-2xl px-4 py-3 shadow-sm ${isOwn ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-sm'
+                                : isAdmin ? 'bg-gradient-to-br from-purple-50 to-indigo-50 text-slate-800 border border-purple-200 rounded-tl-sm'
+                                  : 'bg-white text-slate-800 border border-slate-200 rounded-tl-sm'
+                              } ${message.status === 'failed' ? 'opacity-60' : ''}`}>
                               <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                             </div>
 
@@ -620,9 +612,8 @@ export const Inbox: React.FC = () => {
                     <button
                       type="submit"
                       disabled={!newMessage.trim() || sending || connectionStatus === 'disconnected'}
-                      className={`p-3.5 rounded-2xl transition-all transform ${
-                        newMessage.trim() ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:scale-105' : 'bg-slate-200 text-slate-400'
-                      } disabled:opacity-50 disabled:transform-none`}
+                      className={`p-3.5 rounded-2xl transition-all transform ${newMessage.trim() ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:scale-105' : 'bg-slate-200 text-slate-400'
+                        } disabled:opacity-50 disabled:transform-none`}
                     >
                       {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                     </button>

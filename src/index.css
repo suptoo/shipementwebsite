@@ -6,8 +6,9 @@
 @layer base {
   body {
     @apply bg-gradient-to-b from-slate-50 to-white text-slate-900 antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
-  
+
   * {
     @apply transition-colors duration-200;
   }
@@ -16,10 +17,17 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-padding-top: 80px;
+  }
+
+  /* Safe area for devices with notches */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
 @layer components {
+
   /* Button styles */
   .btn-primary {
     @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02];
@@ -73,26 +81,26 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   /* Custom scrollbar for chat and lists */
   .custom-scrollbar::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-slate-100 rounded-full;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full hover:from-blue-500 hover:to-indigo-600;
   }
-  
+
   /* Glass morphism effect */
   .glass-card {
     background: rgba(255, 255, 255, 0.95);
@@ -113,12 +121,10 @@
 
   /* Shimmer loading effect */
   .shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.4) 50%,
-      rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -127,6 +133,7 @@
     0% {
       background-position: -200% 0;
     }
+
     100% {
       background-position: 200% 0;
     }
@@ -138,9 +145,12 @@
   }
 
   @keyframes pulse-scale {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: scale(1);
     }
+
     50% {
       transform: scale(1.05);
     }
@@ -156,6 +166,7 @@
       opacity: 0;
       transform: translateY(10px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -172,6 +183,7 @@
       opacity: 0;
       transform: translateX(20px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -214,6 +226,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -224,6 +237,7 @@
     from {
       transform: translateX(0);
     }
+
     to {
       transform: translateX(-50%);
     }
@@ -231,9 +245,12 @@
 
   /* Pulse animation */
   @keyframes pulse-slow {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.3;
     }
+
     50% {
       opacity: 0.6;
     }
@@ -246,9 +263,12 @@
   }
 
   @keyframes gradient-shift {
-    0%, 100% {
+
+    0%,
+    100% {
       background-position: 0% 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
@@ -260,9 +280,12 @@
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-20px);
     }
@@ -278,6 +301,7 @@
       opacity: 0;
       transform: translateY(40px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -303,9 +327,13 @@
   }
 
   @keyframes typingDot {
-    0%, 60%, 100% {
+
+    0%,
+    60%,
+    100% {
       transform: translateY(0);
     }
+
     30% {
       transform: translateY(-8px);
     }
@@ -324,12 +352,10 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%);
     transform: rotate(30deg);
     animation: shineMove 3s infinite linear;
   }
@@ -338,8 +364,217 @@
     0% {
       transform: translateX(-100%) rotate(30deg);
     }
+
     100% {
       transform: translateX(100%) rotate(30deg);
+    }
+  }
+
+  /* Mobile bottom nav spacing - add padding to main content */
+  @media (max-width: 767px) {
+    main {
+      padding-bottom: 4.5rem;
+    }
+
+    /* Prevent zoom on input focus for iOS */
+    input[type='text'],
+    input[type='email'],
+    input[type='password'],
+    input[type='number'],
+    input[type='tel'],
+    input[type='url'],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+
+    /* Smooth momentum scrolling */
+    .overflow-y-auto,
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* Better mobile touch interactions */
+  @media (hover: none) and (pointer: coarse) {
+    .hover-lift:hover {
+      transform: none;
+    }
+
+    .hover-lift:active {
+      transform: scale(0.98);
+    }
+
+    /* Disable hover effects that don't work well on touch */
+    .group:hover .group-hover\:scale-110 {
+      transform: none;
+    }
+  }
+
+  /* Smooth mobile scrolling */
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Pull-to-refresh feel */
+  html {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Safe areas for notched phones */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* ========================================
+     PAGE TRANSITION ANIMATIONS
+     ======================================== */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+  }
+
+  /* ========================================
+     MOBILE APP-LIKE ENHANCEMENTS
+     ======================================== */
+
+  /* Prevent text selection on UI elements (app-like) */
+  @media (max-width: 767px) {
+
+    nav,
+    button,
+    .no-select {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+
+  /* Rubber-band overscroll with branded color */
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Bottom bar safe area for mobile */
+  @media (max-width: 767px) {
+    .fixed.bottom-16 {
+      bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Native-feeling touch feedback */
+  @media (hover: none) and (pointer: coarse) {
+
+    /* Card press effect */
+    .bg-white.rounded-xl:active,
+    .bg-white.rounded-2xl:active {
+      transition: transform 0.1s ease;
+    }
+
+    /* Button haptic press */
+    button:active {
+      transition: transform 0.08s ease;
+    }
+
+    /* Swipe-friendly horizontal scrollbars */
+    .overflow-x-auto {
+      scroll-snap-type: x mandatory;
+      scroll-padding: 16px;
+    }
+
+    .overflow-x-auto>* {
+      scroll-snap-align: start;
+    }
+  }
+
+  /* iOS standalone mode adjustments */
+  @media all and (display-mode: standalone) {
+    body {
+      /* Extra top padding when running as installed app */
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    /* Hide the top safe area background */
+    nav.sticky {
+      padding-top: 0;
+    }
+  }
+
+  /* Skeleton loading shimmer for app-like loading */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Slide-in-from-bottom for modals (app-like) */
+  .slide-up-modal {
+    animation: slideUpModal 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes slideUpModal {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth scale bounce on tap */
+  .tap-bounce:active {
+    animation: tapBounce 0.2s ease;
+  }
+
+  @keyframes tapBounce {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(0.95);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* iOS-style blur header */
+  .glass-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  /* Prevent double-tap zoom on mobile */
+  @media (max-width: 767px) {
+    * {
+      touch-action: manipulation;
     }
   }
 }

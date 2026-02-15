@@ -114,21 +114,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    // Trim inputs
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedName = fullName.trim();
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: trimmedEmail,
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: trimmedName,
         },
       },
     });
 
     if (error) {
-      if (error.message?.toLowerCase().includes('registered')) {
+      if (error.message?.toLowerCase().includes('registered') || error.message?.toLowerCase().includes('already')) {
         throw new Error('An account already exists for this email. Please sign in instead.');
       }
+      if (error.message?.toLowerCase().includes('valid email')) {
+        throw new Error('Please enter a valid email address.');
+      }
+      if (error.message?.toLowerCase().includes('password')) {
+        throw new Error('Password must be at least 6 characters long.');
+      }
       throw error;
+    }
+
+    // Supabase may return a user with a fake session if email already exists (identities = [])
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      throw new Error('An account already exists for this email. Please sign in instead.');
     }
 
     if (data.user) {

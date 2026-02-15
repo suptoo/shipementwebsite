@@ -150,13 +150,13 @@ export const CheckoutPage: React.FC = () => {
   // Show success screen after payment
   if (paymentSuccess && paymentDetails) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-12 h-12 text-green-500" />
+      <div className="max-w-lg mx-auto px-4 py-8 sm:py-16 text-center">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
           </div>
-          <h1 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h1>
-          <p className="text-slate-600 mb-6">Your order has been placed successfully.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-green-600 mb-2">Payment Successful!</h1>
+          <p className="text-slate-600 mb-4 sm:mb-6 text-sm sm:text-base">Your order has been placed successfully.</p>
 
           <div className="bg-slate-50 rounded-lg p-4 mb-6 text-left">
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -184,16 +184,16 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen py-4 sm:py-8 pb-36 sm:pb-8">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">Checkout</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Left Column - Address & Payment */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Delivery Address */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h2>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Delivery Address</h2>
               <AddressManager
                 selectedAddress={selectedAddress}
                 onAddressSelect={setSelectedAddress}
@@ -201,10 +201,10 @@ export const CheckoutPage: React.FC = () => {
             </div>
 
             {/* Payment Method */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Method</h2>
-              <div className="space-y-3">
-                <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Payment Method</h2>
+              <div className="space-y-2 sm:space-y-3">
+                <label className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-[0.98] ${paymentMethod === 'cod' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
                   <input
                     type="radio"
                     name="payment"
@@ -213,11 +213,11 @@ export const CheckoutPage: React.FC = () => {
                     onChange={(e) => setPaymentMethod(e.target.value as any)}
                     className="w-4 h-4 text-blue-600"
                   />
-                  <Wallet className={`w-6 h-6 ${paymentMethod === 'cod' ? 'text-blue-600' : 'text-gray-500'}`} />
-                  <span className="font-semibold text-gray-900">Cash on Delivery</span>
+                  <Wallet className={`w-5 h-5 sm:w-6 sm:h-6 ${paymentMethod === 'cod' ? 'text-blue-600' : 'text-gray-500'}`} />
+                  <span className="font-semibold text-gray-900 text-sm sm:text-base">Cash on Delivery</span>
                 </label>
 
-                <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
+                <label className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-[0.98] ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
                   <input
                     type="radio"
                     name="payment"
@@ -226,17 +226,17 @@ export const CheckoutPage: React.FC = () => {
                     onChange={(e) => setPaymentMethod(e.target.value as any)}
                     className="w-4 h-4 text-blue-600"
                   />
-                  <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-500'}`} />
+                  <CreditCard className={`w-5 h-5 sm:w-6 sm:h-6 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-500'}`} />
                   <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900">Credit/Debit Card</span>
-                    <div className="flex gap-2 mt-1">
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">VISA</span>
-                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-bold">Mastercard</span>
+                    <span className="font-semibold text-gray-900 text-sm sm:text-base">Credit/Debit Card</span>
+                    <div className="flex gap-1.5 mt-1">
+                      <span className="text-[10px] sm:text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 rounded font-bold">VISA</span>
+                      <span className="text-[10px] sm:text-xs bg-orange-100 text-orange-700 px-1.5 sm:px-2 py-0.5 rounded font-bold">Mastercard</span>
                     </div>
                   </div>
                 </label>
 
-                <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'mobile' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
+                <label className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-[0.98] ${paymentMethod === 'mobile' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>
                   <input
                     type="radio"
                     name="payment"
@@ -245,22 +245,62 @@ export const CheckoutPage: React.FC = () => {
                     onChange={(e) => setPaymentMethod(e.target.value as any)}
                     className="w-4 h-4 text-blue-600"
                   />
-                  <Smartphone className={`w-6 h-6 ${paymentMethod === 'mobile' ? 'text-blue-600' : 'text-gray-500'}`} />
+                  <Smartphone className={`w-5 h-5 sm:w-6 sm:h-6 ${paymentMethod === 'mobile' ? 'text-blue-600' : 'text-gray-500'}`} />
                   <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900">Mobile Banking</span>
-                    <div className="flex gap-2 mt-1">
-                      <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded font-bold">bKash</span>
-                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-bold">Nagad</span>
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Upay</span>
+                    <span className="font-semibold text-gray-900 text-sm sm:text-base">Mobile Banking</span>
+                    <div className="flex gap-1.5 mt-1">
+                      <span className="text-[10px] sm:text-xs bg-pink-100 text-pink-700 px-1.5 sm:px-2 py-0.5 rounded font-bold">bKash</span>
+                      <span className="text-[10px] sm:text-xs bg-orange-100 text-orange-700 px-1.5 sm:px-2 py-0.5 rounded font-bold">Nagad</span>
+                      <span className="text-[10px] sm:text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 rounded font-bold">Upay</span>
                     </div>
                   </div>
                 </label>
               </div>
             </div>
+
+            {/* Mobile Order Summary (collapsible) */}
+            <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-3">Order Summary</h2>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <img
+                        src={item.product?.images?.[0]?.image_url || 'https://via.placeholder.com/60'}
+                        alt={item.product?.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 line-clamp-1">{item.product?.name}</p>
+                      <p className="text-xs text-gray-500">৳{item.product?.discount_price || item.product?.price} × {item.quantity}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Coupon - Mobile */}
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Coupon Code"
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
+                  />
+                  <button
+                    onClick={handleApplyCoupon}
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors text-sm active:scale-95"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column - Order Summary */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Order Summary - Desktop Only */}
+          <div className="lg:col-span-1 hidden lg:block">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-20">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
@@ -356,6 +396,43 @@ export const CheckoutPage: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Sticky Bottom Bar */}
+        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 px-4 py-3 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500">Total</span>
+              <span className="text-lg font-bold text-blue-600">৳{total.toLocaleString()}</span>
+            </div>
+            {discountAmount > 0 && (
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">-৳{discountAmount}</span>
+            )}
+          </div>
+          <button
+            onClick={handlePlaceOrder}
+            disabled={loading || !selectedAddress}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 disabled:from-gray-400 disabled:to-gray-400 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={18} />
+                Processing...
+              </>
+            ) : paymentMethod === 'cod' ? (
+              'Place Order'
+            ) : paymentMethod === 'card' ? (
+              <>
+                <CreditCard size={18} />
+                Pay ৳{total.toLocaleString()}
+              </>
+            ) : (
+              <>
+                <Smartphone size={18} />
+                Pay ৳{total.toLocaleString()}
+              </>
+            )}
+          </button>
         </div>
 
         {/* Payment Modal */}

@@ -164,7 +164,7 @@ export const SellerRegistration: React.FC = () => {
       if (shopError) throw shopError;
 
       setSuccess(true);
-      
+
       setTimeout(() => {
         navigate('/');
       }, 3000);
@@ -201,18 +201,18 @@ export const SellerRegistration: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-8 md:py-12">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-4 sm:py-8 md:py-12 pb-24 sm:pb-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-full mb-6 shadow-lg">
-            <Store size={24} />
-            <span className="font-bold text-lg">Seller Registration</span>
+        <div className="text-center mb-6 sm:mb-8 md:mb-12">
+          <div className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-4 sm:mb-6 shadow-lg">
+            <Store size={20} />
+            <span className="font-bold text-sm sm:text-lg">Seller Registration</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 sm:mb-4">
             Start Your Selling Journey
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-sm sm:text-lg max-w-2xl mx-auto">
             Fill in your business details and upload required documents. We'll review your application within 24-48 hours.
           </p>
         </div>
@@ -233,7 +233,7 @@ export const SellerRegistration: React.FC = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Shop Information</h2>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -276,7 +276,7 @@ export const SellerRegistration: React.FC = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Business Details</h2>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -371,7 +371,7 @@ export const SellerRegistration: React.FC = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Bank Information</h2>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -436,7 +436,7 @@ export const SellerRegistration: React.FC = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Required Documents</h2>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">

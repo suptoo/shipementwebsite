@@ -9,10 +9,12 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
 
@@ -30,8 +32,18 @@ export const Login: React.FC = () => {
       setError('Please enter your email address.');
       return;
     }
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long.');
+      return;
+    }
+    if (isSignUp && password !== confirmPassword) {
+      setError('Passwords do not match. Please try again.');
       return;
     }
 
@@ -45,6 +57,7 @@ export const Login: React.FC = () => {
         setTimeout(() => {
           setIsSignUp(false);
           setPassword('');
+          setConfirmPassword('');
           setSuccess('');
         }, 4000);
       } else {
@@ -96,7 +109,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 flex items-center justify-center px-4 py-6 sm:p-4 relative overflow-hidden">
       {/* Animated background pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
 
@@ -106,22 +119,22 @@ export const Login: React.FC = () => {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 sm:p-10 transform transition-all relative z-10 border border-white/20">
-        <div className="text-center mb-8">
-          <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-6 sm:p-10 transform transition-all relative z-10 border border-white/20 max-h-[95vh] overflow-y-auto scrollbar-hide">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="mb-4 sm:mb-6 flex justify-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl sm:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1 sm:mb-2">
             Bongoportus
           </h1>
-          <p className="text-gray-600 font-medium">Your trusted marketplace</p>
+          <p className="text-gray-600 font-medium text-sm sm:text-base">Your trusted marketplace</p>
         </div>
 
-        <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-xl">
+        <div className="flex gap-2 mb-6 sm:mb-8 bg-gray-100 p-1 rounded-xl">
           <button
             onClick={() => {
               setIsSignUp(false);
@@ -209,111 +222,151 @@ export const Login: React.FC = () => {
             </button>
           </form>
         ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {isSignUp && (
-            <div className="animate-in fade-in duration-300">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {isSignUp && (
+              <div className="animate-in fade-in duration-300">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
+                  placeholder="John Doe"
+                />
+              </div>
+            )}
+
+            <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Full Name
+                Email Address
               </label>
               <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                placeholder="John Doe"
+                placeholder="you@example.com"
               />
             </div>
-          )}
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-4 py-3 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-base"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors p-1"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
-          </div>
-          {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-200">
-              {error}
-            </div>
-          )}
 
-          {success && (
-            <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-200 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 flex-shrink-0" />
-              {success}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white py-4 px-4 rounded-xl font-bold text-lg hover:from-blue-800 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-blue-900/30 hover:shadow-xl hover:shadow-blue-900/40 transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin w-5 h-5 mr-2" />
-                Processing...
-              </>
-            ) : isSignUp ? (
-              'Create Account'
-            ) : (
-              'Sign In'
+            {isSignUp && (
+              <div className="animate-in fade-in duration-300">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className={`w-full px-4 py-3 pr-12 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-base ${confirmPassword && password !== confirmPassword
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                        : confirmPassword && password === confirmPassword
+                          ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                          : 'border-slate-200'
+                      }`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors p-1"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                )}
+                {confirmPassword && password === confirmPassword && (
+                  <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Passwords match
+                  </p>
+                )}
+              </div>
             )}
-          </button>
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-200">
+                {error}
+              </div>
+            )}
 
-          {/* Forgot Password */}
-          {!isSignUp && (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => { setShowForgotPassword(true); setError(''); setSuccess(''); setForgotEmail(email); }}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
-              >
-                Forgot your password?
-              </button>
-            </div>
-          )}
+            {success && (
+              <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-200 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                {success}
+              </div>
+            )}
 
-          {/* Password hint for signup */}
-          {isSignUp && (
-            <p className="text-xs text-gray-400 text-center">Password must be at least 6 characters</p>
-          )}
-        </form>
+            <button
+              type="submit"
+              disabled={loading || (isSignUp && password !== confirmPassword && confirmPassword.length > 0)}
+              className="w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white py-3.5 sm:py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:from-blue-800 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-blue-900/30 hover:shadow-xl hover:shadow-blue-900/40 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin w-5 h-5 mr-2" />
+                  Processing...
+                </>
+              ) : isSignUp ? (
+                'Create Account'
+              ) : (
+                'Sign In'
+              )}
+            </button>
+
+            {/* Forgot Password */}
+            {!isSignUp && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPassword(true); setError(''); setSuccess(''); setForgotEmail(email); }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
+
+            {/* Password hint for signup */}
+            {isSignUp && (
+              <p className="text-xs text-gray-400 text-center">Password must be at least 6 characters</p>
+            )}
+          </form>
         )}
 
         {/* Divider */}
-        <div className="relative my-6">
+        <div className="relative my-5 sm:my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
           </div>
@@ -373,7 +426,7 @@ export const Login: React.FC = () => {
             }
           }}
           disabled={loading}
-          className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm hover:shadow-md transform hover:scale-[1.02] active:scale-[0.98] mt-3"
+          className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm hover:shadow-md transform hover:scale-[1.02] active:scale-[0.98] mt-2 sm:mt-3"
         >
           <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />

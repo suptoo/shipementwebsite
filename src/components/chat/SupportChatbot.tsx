@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  MessageCircle, X, Send, Loader2, Bot, User, 
-  Headphones, Sparkles, ChevronRight 
+import {
+  MessageCircle, X, Send, Loader2, Bot, User,
+  Headphones, Sparkles, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { messagingService } from '../../services/messagingService';
@@ -65,7 +65,7 @@ export const SupportChatbot: React.FC = () => {
 
   const initConversation = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       // Get or create a support conversation
@@ -74,17 +74,17 @@ export const SupportChatbot: React.FC = () => {
         buyerId: user.id,
       });
       setConversation(conv);
-      
+
       // Load existing messages
       const msgs = await messagingService.getMessages(conv.id);
       setMessages(msgs);
       setShowQuickActions(msgs.length === 0);
-      
+
       // Subscribe to new messages
       const subscription = messagingService.subscribeToMessages(conv.id, (newMsg) => {
         setMessages(prev => [...prev, newMsg]);
       });
-      
+
       return () => {
         subscription.unsubscribe();
       };
@@ -138,43 +138,40 @@ export const SupportChatbot: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 transition-all duration-500 transform ${
-          isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
-        }`}
+        className={`fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 transition-all duration-500 transform ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
+          }`}
       >
         <div className="relative group">
           {/* Pulse Animation */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-ping opacity-25"></div>
-          
+
           {/* Main Button */}
           <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-500/50 hover:scale-110 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <Headphones className="w-7 h-7 relative z-10" />
           </div>
-          
+
           {/* Notification Badge */}
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
         </div>
       </button>
 
       {/* Chat Window */}
-      <div className={`fixed z-50 transition-all duration-500 ease-out ${
-        isOpen 
-          ? 'opacity-100 translate-y-0 pointer-events-auto' 
+      <div className={`fixed z-50 transition-all duration-500 ease-out ${isOpen
+          ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 translate-y-8 pointer-events-none'
-      } ${
-        isExpanded 
-          ? 'bottom-0 right-0 w-full h-full sm:bottom-4 sm:right-4 sm:w-[480px] sm:h-[700px] sm:rounded-2xl' 
-          : 'bottom-4 right-4 w-[380px] h-[550px] rounded-2xl'
-      }`}>
+        } ${isExpanded
+          ? 'bottom-0 right-0 w-full h-full sm:bottom-4 sm:right-4 sm:w-[480px] sm:h-[700px] sm:rounded-2xl'
+          : 'bottom-0 right-0 w-full h-[85vh] sm:bottom-4 sm:right-4 sm:w-[380px] sm:h-[550px] rounded-t-2xl sm:rounded-2xl'
+        }`}>
         <div className="bg-white h-full w-full sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
-          
+
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white p-4 relative overflow-hidden flex-shrink-0">
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
-            
+
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -271,7 +268,7 @@ export const SupportChatbot: React.FC = () => {
                 {messages.map((msg) => {
                   const isOwn = msg.sender_id === user?.id;
                   const isPaymentRequest = msg.content.startsWith('[PAYMENT_REQUEST]');
-                  
+
                   if (isPaymentRequest) {
                     const paymentData = JSON.parse(msg.content.replace('[PAYMENT_REQUEST]', ''));
                     return (
@@ -301,11 +298,10 @@ export const SupportChatbot: React.FC = () => {
 
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
-                        isOwn
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${isOwn
                           ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white'
                           : 'bg-white border border-gray-200 text-gray-800'
-                      }`}>
+                        }`}>
                         {!isOwn && (
                           <div className="flex items-center gap-2 mb-1">
                             <Bot className="w-4 h-4 text-purple-500" />
@@ -314,9 +310,9 @@ export const SupportChatbot: React.FC = () => {
                         )}
                         <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                         <p className={`text-xs mt-2 ${isOwn ? 'text-blue-200' : 'text-gray-400'}`}>
-                          {new Date(msg.created_at).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                          {new Date(msg.created_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
                           })}
                         </p>
                       </div>
