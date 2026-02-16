@@ -30,7 +30,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProductProvider>().loadProduct(widget.productId);
+    final provider = context.read<ProductProvider>();
+    provider.loadProduct(widget.productId);
+    // Track product view — syncs across app & website via Realtime
+    provider.incrementViews(widget.productId);
     _loadReviews();
   }
 
@@ -244,9 +247,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: product.inStock
-                  ? AppTheme.successColor
-                  : AppTheme.errorColor,
+              color:
+                  product.inStock ? AppTheme.successColor : AppTheme.errorColor,
             ),
           ),
         ),
@@ -294,7 +296,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ? NetworkImage(product.shop!.logoUrl!)
                 : null,
             child: product.shop?.logoUrl == null
-                ? const Icon(Icons.store, color: AppTheme.primaryColor, size: 20)
+                ? const Icon(Icons.store,
+                    color: AppTheme.primaryColor, size: 20)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -594,7 +597,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   label: const Text('Add to Cart'),
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.buttonRadius),
                     ),
                   ),
                 ),
@@ -634,7 +638,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Text(
                       'Buy Now',
                       style: TextStyle(
-                        color: product.inStock ? Colors.white : Colors.grey.shade500,
+                        color: product.inStock
+                            ? Colors.white
+                            : Colors.grey.shade500,
                       ),
                     ),
                   ),

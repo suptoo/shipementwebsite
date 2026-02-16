@@ -26,9 +26,8 @@ class CartItem {
       productId: json['product_id'] ?? '',
       variantId: json['variant_id'],
       quantity: json['quantity'] ?? 1,
-      product: json['products'] != null
-          ? Product.fromJson(json['products'])
-          : null,
+      product:
+          json['products'] != null ? Product.fromJson(json['products']) : null,
       variant: json['product_variants'] != null
           ? ProductVariant.fromJson(json['product_variants'])
           : null,
@@ -38,7 +37,7 @@ class CartItem {
   double get totalPrice {
     if (product == null) return 0;
     final basePrice = product!.effectivePrice;
-    final modifier = variant?.priceModifier ?? 0;
+    final modifier = variant?.priceAdjustment ?? 0;
     return (basePrice + modifier) * quantity;
   }
 

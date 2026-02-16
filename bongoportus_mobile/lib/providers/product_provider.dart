@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product.dart';
 import '../models/category.dart';
 import '../models/brand.dart';
@@ -6,6 +7,8 @@ import '../services/product_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   final ProductService _productService = ProductService();
+  final SupabaseClient _supabase = Supabase.instance.client;
+  RealtimeChannel? _productChannel;
 
   List<Product> _products = [];
   List<Product> _featuredProducts = [];
@@ -70,7 +73,8 @@ class ProductProvider extends ChangeNotifier {
   }
 
   /// Load products with filters
-  Future<void> loadProducts({ProductFilters? filters, bool refresh = false}) async {
+  Future<void> loadProducts(
+      {ProductFilters? filters, bool refresh = false}) async {
     if (refresh) {
       _currentPage = 1;
       _products = [];
@@ -185,5 +189,119 @@ class ProductProvider extends ChangeNotifier {
 
   void clearSelectedProduct() {
     _selectedProduct = null;
+  }
+
+  // ─── Real-time product sync ───────────────────────────────
+  /// Subscribe to real-time product changes so both app and website stay in sync.
+  void subscribeToProductChanges() {
+    _productChannel?.unsubscribe();
+    _productChannel = _supabase
+        .channel('products-realtime-mobile')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'products',
+          callback: (payload) {
+            _handleProductUpdate(payload.newRecord);
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'products',
+          callback: (payload) {
+            // A new product was added — refresh lists on next load
+            _refreshNeeded = true;
+            notifyListeners();
+          },
+        )
+        .subscribe();
+  }
+
+  bool _refreshNeeded = false;
+  bool get refreshNeeded => _refreshNeeded;
+  void clearRefreshNeeded() => _refreshNeeded = false;
+
+  void _handleProductUpdate(Map<String, dynamic> updatedData) {
+    final id = updatedData['id'];
+    if (id == null) return;
+
+    // Update in featured products
+    _updateProductInList(_featuredProducts, id, updatedData);
+    // Update in new arrivals
+    _updateProductInList(_newArrivals, id, updatedData);
+    // Update in main product list
+    _updateProductInList(_products, id, updatedData);
+    // Update selected product if it matches
+    if (_selectedProduct?.id == id) {
+      _selectedProduct = Product.fromJson({
+        ..._selectedProductToMap(),
+        ...updatedData,
+      });
+    }
+
+    notifyListeners();
+  }
+
+  void _updateProductInList(
+      List<Product> list, String id, Map<String, dynamic> updatedData) {
+    final idx = list.indexWhere((p) => p.id == id);
+    if (idx != -1) {
+      // Merge updated fields into existing product JSON
+      final existing = _productToBasicMap(list[idx]);
+      existing.addAll(updatedData);
+      list[idx] = Product.fromJson(existing);
+    }
+  }
+
+  Map<String, dynamic> _productToBasicMap(Product p) => {
+        'id': p.id,
+        'seller_id': p.sellerId,
+        'shop_id': p.shopId,
+        'category_id': p.categoryId,
+        'brand_id': p.brandId,
+        'name': p.name,
+        'slug': p.slug,
+        'description': p.description,
+        'price': p.price,
+        'discount_price': p.discountPrice,
+        'discount_percentage': p.discountPercentage,
+        'stock_quantity': p.stockQuantity,
+        'sku': p.sku,
+        'rating': p.rating,
+        'total_reviews': p.totalReviews,
+        'total_sales': p.totalSales,
+        'is_featured': p.isFeatured,
+        'is_active': p.isActive,
+        'approval_status': p.approvalStatus,
+      };
+
+  Map<String, dynamic> _selectedProductToMap() {
+    if (_selectedProduct == null) return {};
+    return _productToBasicMap(_selectedProduct!);
+  }
+
+  /// Atomically increment view count via server RPC.
+  /// The update propagates via Realtime to all connected clients.
+  Future<void> incrementViews(String productId) async {
+    try {
+      await _supabase.rpc('increment_product_views', params: {
+        'p_product_id': productId,
+      });
+    } catch (e) {
+      debugPrint('Failed to increment product views: $e');
+    }
+  }
+
+  /// Unsubscribe from realtime (call in dispose)
+  void disposeRealtime() {
+    _productChannel?.unsubscribe();
+    _productChannel = null;
+  }
+
+  @override
+  void dispose() {
+    disposeRealtime();
+    super.dispose();
   }
 }

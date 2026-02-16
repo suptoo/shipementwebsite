@@ -403,6 +403,8 @@ DO $$ BEGIN
   ALTER TABLE order_items ADD COLUMN IF NOT EXISTS item_status TEXT DEFAULT 'pending';
   -- reviews
   ALTER TABLE reviews ADD COLUMN IF NOT EXISTS image_urls TEXT[];
+  ALTER TABLE reviews ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+  ALTER TABLE reviews ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
   -- conversations
   ALTER TABLE conversations ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'buyer_seller';
   ALTER TABLE conversations ADD COLUMN IF NOT EXISTS order_id UUID;
@@ -808,6 +810,26 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE orders;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE products;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE cart_items;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- =====================================================
+-- PRODUCT VIEW TRACKING (RPC function for atomic increment)
+-- =====================================================
+
+DROP FUNCTION IF EXISTS increment_product_views(UUID) CASCADE;
+CREATE FUNCTION increment_product_views(p_product_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE products SET views = COALESCE(views, 0) + 1 WHERE id = p_product_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =====================================================
 -- SEED DATA

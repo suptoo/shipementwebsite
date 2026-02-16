@@ -19,15 +19,89 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late AnimationController _heroAnimCtrl;
+  late AnimationController _sectionAnimCtrl;
+  late AnimationController _promoAnimCtrl;
+  final PageController _promoPageCtrl = PageController();
+
+  // Staggered section animations
+  late Animation<double> _quickActionsAnim;
+  late Animation<double> _categoriesAnim;
+  late Animation<double> _featuredAnim;
+  late Animation<double> _newArrivalsAnim;
+
+  int _currentPromoPage = 0;
+
+  static const List<Map<String, dynamic>> _promoBanners = [
+    {
+      'title': 'Flash Sale \u26A1',
+      'subtitle': 'Up to 50% off electronics',
+      'gradient': [Color(0xFFFF6B35), Color(0xFFFF9A6C)],
+    },
+    {
+      'title': 'New Arrivals \u2728',
+      'subtitle': 'Fresh styles just dropped',
+      'gradient': [Color(0xFF667eea), Color(0xFF764ba2)],
+    },
+    {
+      'title': 'Free Shipping \uD83D\uDE9A',
+      'subtitle': 'On orders above \u09F3500',
+      'gradient': [Color(0xFF43e97b), Color(0xFF38f9d7)],
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
+
+    // Hero entrance
     _heroAnimCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
+
+    // Staggered sections cascade (1200ms total, each section gets an interval)
+    _sectionAnimCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _quickActionsAnim = CurvedAnimation(
+      parent: _sectionAnimCtrl,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOutCubic),
+    );
+    _categoriesAnim = CurvedAnimation(
+      parent: _sectionAnimCtrl,
+      curve: const Interval(0.15, 0.55, curve: Curves.easeOutCubic),
+    );
+    _featuredAnim = CurvedAnimation(
+      parent: _sectionAnimCtrl,
+      curve: const Interval(0.35, 0.75, curve: Curves.easeOutCubic),
+    );
+    _newArrivalsAnim = CurvedAnimation(
+      parent: _sectionAnimCtrl,
+      curve: const Interval(0.55, 1.0, curve: Curves.easeOutCubic),
+    );
+
+    // Promo banner auto-scroll
+    _promoAnimCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _currentPromoPage = (_currentPromoPage + 1) % _promoBanners.length;
+          if (_promoPageCtrl.hasClients) {
+            _promoPageCtrl.animateToPage(
+              _currentPromoPage,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          }
+          _promoAnimCtrl.forward(from: 0);
+        }
+      });
+
     _heroAnimCtrl.forward();
+    _sectionAnimCtrl.forward();
+    _promoAnimCtrl.forward();
     _loadData();
   }
 
@@ -45,6 +119,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _scrollController.dispose();
     _heroAnimCtrl.dispose();
+    _sectionAnimCtrl.dispose();
+    _promoAnimCtrl.dispose();
+    _promoPageCtrl.dispose();
     super.dispose();
   }
 
@@ -96,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             slivers: [
               _buildHeroSection(),
+              _buildPromoBanner(),
               _buildQuickActions(),
               _buildCategoriesGrid(),
               _buildFeaturedSection(),
@@ -306,7 +384,92 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // ══════════════════════════════════════════════
-  // QUICK ACTIONS
+  // PROMO BANNER — auto-scrolling
+  // ══════════════════════════════════════════════
+  Widget _buildPromoBanner() {
+    return SliverToBoxAdapter(
+      child: FadeTransition(
+        opacity: _quickActionsAnim,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppTheme.pagePadding, 16, AppTheme.pagePadding, 0),
+          child: SizedBox(
+            height: 100,
+            child: PageView.builder(
+              controller: _promoPageCtrl,
+              itemCount: _promoBanners.length,
+              onPageChanged: (i) => _currentPromoPage = i,
+              itemBuilder: (_, i) {
+                final banner = _promoBanners[i];
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: banner['gradient'] as List<Color>,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (banner['gradient'] as List<Color>).first.withAlpha(40),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              banner['title'] as String,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              banner['subtitle'] as String,
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(210),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(40),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════
+  // QUICK ACTIONS — staggered elastic entrance
   // ══════════════════════════════════════════════
   Widget _buildQuickActions() {
     final actions = [
@@ -331,118 +494,159 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       {
         'icon': Icons.storefront_rounded,
         'label': 'Sellers',
-        'color': Color(0xFF8B5CF6),
+        'color': const Color(0xFF8B5CF6),
         'route': '/products',
       },
     ];
 
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppTheme.pagePadding, 20, AppTheme.pagePadding, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: actions.map((a) {
-            return GestureDetector(
-              onTap: () => context.push(a['route'] as String),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: (a['color'] as Color).withAlpha(18),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      a['icon'] as IconData,
-                      color: a['color'] as Color,
-                      size: 26,
+      child: FadeTransition(
+        opacity: _quickActionsAnim,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.15),
+            end: Offset.zero,
+          ).animate(_quickActionsAnim),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppTheme.pagePadding, 20, AppTheme.pagePadding, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: actions.asMap().entries.map((entry) {
+                final i = entry.key;
+                final a = entry.value;
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: Duration(milliseconds: 400 + (i * 100)),
+                  curve: Curves.elasticOut,
+                  builder: (_, val, child) => Transform.scale(
+                    scale: val.clamp(0.0, 1.0),
+                    child: child,
+                  ),
+                  child: GestureDetector(
+                    onTap: () => context.push(a['route'] as String),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: (a['color'] as Color).withAlpha(18),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            a['icon'] as IconData,
+                            color: a['color'] as Color,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          a['label'] as String,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    a['label'] as String,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
   }
 
   // ══════════════════════════════════════════════
-  // CATEGORIES GRID — 3 columns
+  // CATEGORIES GRID — staggered fade-in
   // ══════════════════════════════════════════════
   Widget _buildCategoriesGrid() {
     return Consumer<ProductProvider>(
       builder: (context, provider, _) {
         return SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                title: 'Shop by Category',
-                icon: Icons.grid_view_rounded,
-                iconColor: AppTheme.primaryColor,
-                onViewAll: () => context.push('/categories'),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.pagePadding),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.95,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+          child: FadeTransition(
+            opacity: _categoriesAnim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.08),
+                end: Offset.zero,
+              ).animate(_categoriesAnim),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'Shop by Category',
+                    icon: Icons.grid_view_rounded,
+                    iconColor: AppTheme.primaryColor,
+                    onViewAll: () => context.push('/categories'),
                   ),
-                  itemCount: provider.categories.isNotEmpty
-                      ? provider.categories.length.clamp(0, 6)
-                      : _defaultCategories.length,
-                  itemBuilder: (context, index) {
-                    if (provider.categories.isNotEmpty) {
-                      final cat = provider.categories[index];
-                      final colors = index < _defaultCategories.length
-                          ? _defaultCategories[index]['gradient'] as List<Color>
-                          : [AppTheme.primaryColor, AppTheme.primaryLight];
-                      final emoji = index < _defaultCategories.length
-                          ? _defaultCategories[index]['emoji'] as String
-                          : '📦';
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.pagePadding),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        childAspectRatio: 0.95,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: provider.categories.isNotEmpty
+                          ? provider.categories.length.clamp(0, 6)
+                          : _defaultCategories.length,
+                      itemBuilder: (context, index) {
+                        if (provider.categories.isNotEmpty) {
+                          final cat = provider.categories[index];
+                          final colors = index < _defaultCategories.length
+                              ? _defaultCategories[index]['gradient'] as List<Color>
+                              : [AppTheme.primaryColor, AppTheme.primaryLight];
+                          final emoji = index < _defaultCategories.length
+                              ? _defaultCategories[index]['emoji'] as String
+                              : '\uD83D\uDCE6';
 
-                      return _CategoryCard(
-                        emoji: emoji,
-                        name: cat.name,
-                        gradient: colors,
-                        onTap: () {
-                          provider.updateFilters(
-                            ProductFilters(categoryId: cat.id),
+                          return TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: Duration(milliseconds: 400 + (index * 80)),
+                            curve: Curves.easeOutCubic,
+                            builder: (_, val, child) => Opacity(
+                              opacity: val,
+                              child: Transform.translate(
+                                offset: Offset(0, 12 * (1 - val)),
+                                child: child,
+                              ),
+                            ),
+                            child: _CategoryCard(
+                              emoji: emoji,
+                              name: cat.name,
+                              gradient: colors,
+                              onTap: () {
+                                provider.updateFilters(
+                                  ProductFilters(categoryId: cat.id),
+                                );
+                                context.push('/products');
+                              },
+                            ),
                           );
-                          context.push('/products');
-                        },
-                      );
-                    }
+                        }
 
-                    // Default categories fallback
-                    final def = _defaultCategories[index];
-                    return _CategoryCard(
-                      emoji: def['emoji'] as String,
-                      name: def['name'] as String,
-                      gradient: def['gradient'] as List<Color>,
-                      onTap: () => context.push('/products'),
-                    );
-                  },
-                ),
+                        // Default categories fallback
+                        final def = _defaultCategories[index];
+                        return _CategoryCard(
+                          emoji: def['emoji'] as String,
+                          name: def['name'] as String,
+                          gradient: def['gradient'] as List<Color>,
+                          onTap: () => context.push('/products'),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -534,40 +738,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
 
         return SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                title: 'Featured',
-                icon: Icons.star_rounded,
-                iconColor: AppTheme.primaryColor,
-                onViewAll: () {
-                  provider.updateFilters(ProductFilters(sortBy: 'popular'));
-                  context.push('/products');
-                },
+          child: FadeTransition(
+            opacity: _featuredAnim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.06),
+                end: Offset.zero,
+              ).animate(_featuredAnim),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'Featured',
+                    icon: Icons.star_rounded,
+                    iconColor: AppTheme.primaryColor,
+                    onViewAll: () {
+                      provider.updateFilters(ProductFilters(sortBy: 'popular'));
+                      context.push('/products');
+                    },
+                  ),
+                  SizedBox(
+                    height: 285,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.pagePadding),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: provider.featuredProducts.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 14),
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: 175,
+                          child: ProductCard(
+                            product: provider.featuredProducts[index],
+                            onTap: () => context.push(
+                              '/product/${provider.featuredProducts[index].id}',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 285,
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.pagePadding),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: provider.featuredProducts.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 14),
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: 175,
-                      child: ProductCard(
-                        product: provider.featuredProducts[index],
-                        onTap: () => context.push(
-                          '/product/${provider.featuredProducts[index].id}',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -589,42 +802,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
 
         return SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                title: 'New Arrivals',
-                icon: Icons.new_releases_rounded,
-                iconColor: AppTheme.successColor,
-                onViewAll: () {
-                  provider.updateFilters(ProductFilters(sortBy: 'newest'));
-                  context.push('/products');
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.pagePadding),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.62,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
+          child: FadeTransition(
+            opacity: _newArrivalsAnim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.06),
+                end: Offset.zero,
+              ).animate(_newArrivalsAnim),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    title: 'New Arrivals',
+                    icon: Icons.new_releases_rounded,
+                    iconColor: AppTheme.successColor,
+                    onViewAll: () {
+                      provider.updateFilters(ProductFilters(sortBy: 'newest'));
+                      context.push('/products');
+                    },
                   ),
-                  itemCount: provider.newArrivals.length.clamp(0, 6),
-                  itemBuilder: (context, index) {
-                    return ProductCard(
-                      product: provider.newArrivals[index],
-                      onTap: () => context.push(
-                        '/product/${provider.newArrivals[index].id}',
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.pagePadding),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.62,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
                       ),
-                    );
-                  },
-                ),
+                      itemCount: provider.newArrivals.length.clamp(0, 6),
+                      itemBuilder: (context, index) {
+                        return ProductCard(
+                          product: provider.newArrivals[index],
+                          onTap: () => context.push(
+                            '/product/${provider.newArrivals[index].id}',
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

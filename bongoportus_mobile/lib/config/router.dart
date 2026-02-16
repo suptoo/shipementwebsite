@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'page_transitions.dart';
 import '../providers/auth_provider.dart';
 import '../screens/main_shell.dart';
 import '../screens/auth/login_screen.dart';
@@ -89,22 +90,31 @@ class AppRouter {
           path: '/register',
           builder: (_, __) => const RegisterScreen(),
         ),
-        // Product detail
+        // Product detail — fade through
         GoRoute(
           path: '/product/:id',
-          builder: (_, state) => ProductDetailScreen(
-            productId: state.pathParameters['id']!,
+          pageBuilder: (_, state) => FadeThroughPage(
+            key: state.pageKey,
+            child: ProductDetailScreen(
+              productId: state.pathParameters['id']!,
+            ),
           ),
         ),
-        // Categories
+        // Categories — fade through
         GoRoute(
           path: '/categories',
-          builder: (_, __) => const CategoryListScreen(),
+          pageBuilder: (_, state) => FadeThroughPage(
+            key: state.pageKey,
+            child: const CategoryListScreen(),
+          ),
         ),
-        // Checkout
+        // Checkout — slide up
         GoRoute(
           path: '/checkout',
-          builder: (_, __) => const CheckoutScreen(),
+          pageBuilder: (_, state) => SlideUpPage(
+            key: state.pageKey,
+            child: const CheckoutScreen(),
+          ),
         ),
         // Order detail
         GoRoute(
@@ -113,16 +123,22 @@ class AppRouter {
             orderId: state.pathParameters['id']!,
           ),
         ),
-        // Search
+        // Search — fade through
         GoRoute(
           path: '/search',
-          builder: (_, __) => const SearchScreen(),
+          pageBuilder: (_, state) => FadeThroughPage(
+            key: state.pageKey,
+            child: const SearchScreen(),
+          ),
         ),
-        // Product Inquiry chat
+        // Product Inquiry — slide up
         GoRoute(
           path: '/inquiry',
-          builder: (_, state) => ProductInquiryScreen(
-            initialQuery: state.uri.queryParameters['q'],
+          pageBuilder: (_, state) => SlideUpPage(
+            key: state.pageKey,
+            child: ProductInquiryScreen(
+              initialQuery: state.uri.queryParameters['q'],
+            ),
           ),
         ),
         // Messages/Chat

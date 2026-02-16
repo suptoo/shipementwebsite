@@ -29,6 +29,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isSubmitting = false;
   List<Address> _savedAddresses = [];
   Address? _selectedAddress;
+  int _currentStep = 0;
+
+  static const List<Map<String, dynamic>> _steps = [
+    {'icon': Icons.location_on_rounded, 'label': 'Address'},
+    {'icon': Icons.payment_rounded, 'label': 'Payment'},
+    {'icon': Icons.receipt_long_rounded, 'label': 'Review'},
+  ];
 
   @override
   void initState() {
@@ -152,6 +159,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _buildStepIndicator(),
+
             // Saved addresses
             if (_savedAddresses.isNotEmpty) ...[
               const Text(
@@ -295,20 +304,134 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: SafeArea(
           child: SizedBox(
             width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _placeOrder,
-              child: _isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text('Place Order - ৳${cart.total.toStringAsFixed(0)}'),
+            height: 54,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: _isSubmitting
+                    ? LinearGradient(
+                        colors: [Colors.grey.shade400, Colors.grey.shade300])
+                    : AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                boxShadow: _isSubmitting
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: AppTheme.primaryColor.withAlpha(70),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+              ),
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _placeOrder,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.buttonRadius),
+                  ),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.lock_rounded,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Place Order — ৳${cart.total.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        children: _steps.asMap().entries.map((entry) {
+          final i = entry.key;
+          final step = entry.value;
+          final isActive = i <= _currentStep;
+          final isLast = i == _steps.length - 1;
+          return Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _currentStep = i),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: isActive
+                                ? AppTheme.primaryGradient
+                                : null,
+                            color:
+                                isActive ? null : Colors.grey.shade200,
+                          ),
+                          child: Icon(
+                            step['icon'] as IconData,
+                            size: 18,
+                            color: isActive
+                                ? Colors.white
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          step['label'] as String,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isActive
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isActive
+                                ? AppTheme.primaryColor
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (!isLast)
+                  Container(
+                    height: 2,
+                    width: 24,
+                    margin: const EdgeInsets.only(bottom: 18),
+                    decoration: BoxDecoration(
+                      color: i < _currentStep
+                          ? AppTheme.primaryColor
+                          : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }

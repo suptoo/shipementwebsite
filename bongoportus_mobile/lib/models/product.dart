@@ -33,7 +33,7 @@ class ProductVariant {
   final String productId;
   final String variantType;
   final String variantValue;
-  final double priceModifier;
+  final double priceAdjustment;
   final int stockQuantity;
   final String? sku;
 
@@ -42,7 +42,7 @@ class ProductVariant {
     required this.productId,
     required this.variantType,
     required this.variantValue,
-    this.priceModifier = 0,
+    this.priceAdjustment = 0,
     this.stockQuantity = 0,
     this.sku,
   });
@@ -53,7 +53,7 @@ class ProductVariant {
       productId: json['product_id'] ?? '',
       variantType: json['variant_type'] ?? '',
       variantValue: json['variant_value'] ?? '',
-      priceModifier: (json['price_modifier'] ?? 0).toDouble(),
+      priceAdjustment: (json['price_adjustment'] ?? 0).toDouble(),
       stockQuantity: json['stock_quantity'] ?? 0,
       sku: json['sku'],
     );
@@ -149,8 +149,7 @@ class Product {
       category: json['categories'] != null
           ? Category.fromJson(json['categories'])
           : null,
-      brand:
-          json['brands'] != null ? Brand.fromJson(json['brands']) : null,
+      brand: json['brands'] != null ? Brand.fromJson(json['brands']) : null,
       shop: json['shops'] != null ? Shop.fromJson(json['shops']) : null,
     );
   }
