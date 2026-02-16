@@ -82,12 +82,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(28),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.surfaceColor,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.primaryColor.withAlpha(20),
+                          AppTheme.primaryColor.withAlpha(6),
+                        ],
+                      ),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.receipt_long_outlined,
-                        size: 56, color: Color(0xFFE0E0E0)),
+                    child: Icon(Icons.receipt_long_outlined,
+                        size: 56, color: AppTheme.primaryColor.withAlpha(80)),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -160,14 +167,24 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+      child: InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           boxShadow: AppTheme.softShadow,
+          border: Border(
+            left: BorderSide(
+              color: _statusColor(order.orderStatus),
+              width: 3,
+            ),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,6 +280,7 @@ class _OrderCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

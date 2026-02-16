@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../models/product.dart';
 import '../../services/product_service.dart';
@@ -111,7 +112,21 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search, size: 80, color: Colors.grey.shade300),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.primaryColor.withAlpha(20),
+                    AppTheme.primaryColor.withAlpha(6),
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.search, size: 64, color: AppTheme.primaryColor.withAlpha(80)),
+            ),
             const SizedBox(height: 16),
             Text(
               'Search for products',
@@ -136,7 +151,14 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.search_off, size: 48, color: Colors.grey.shade400),
+            ),
             const SizedBox(height: 16),
             Text(
               'No results found',
@@ -162,7 +184,7 @@ class _SearchScreenState extends State<SearchScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) => _SearchResultTile(
         product: _results[i],
-        onTap: () => Navigator.pushNamed(context, '/product/${_results[i].id}'),
+        onTap: () => context.push('/product/${_results[i].id}'),
       ),
     );
   }
@@ -176,12 +198,16 @@ class _SearchResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      splashColor: AppTheme.primaryColor.withAlpha(20),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200),
         ),
@@ -277,6 +303,7 @@ class _SearchResultTile extends StatelessWidget {
             Icon(Icons.chevron_right, color: Colors.grey.shade400),
           ],
         ),
+      ),
       ),
     );
   }

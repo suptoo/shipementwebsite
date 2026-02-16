@@ -558,14 +558,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Widget _buildBottomBar(Product product) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.pagePadding),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withAlpha(240),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(10),
+            color: Colors.black.withAlpha(12),
             offset: const Offset(0, -4),
-            blurRadius: 12,
+            blurRadius: 16,
           ),
         ],
       ),
@@ -601,13 +601,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            // Buy now
+            // Buy now — gradient
             Expanded(
               child: SizedBox(
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: product.inStock ? () => _buyNow(product) : null,
-                  child: const Text('Buy Now'),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: product.inStock
+                        ? const LinearGradient(
+                            colors: [Color(0xFFFF6B35), Color(0xFFFF8A57)],
+                          )
+                        : null,
+                    color: product.inStock ? null : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                    boxShadow: product.inStock
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.primaryColor.withAlpha(50),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: product.inStock ? () => _buyNow(product) : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      disabledBackgroundColor: Colors.transparent,
+                    ),
+                    child: Text(
+                      'Buy Now',
+                      style: TextStyle(
+                        color: product.inStock ? Colors.white : Colors.grey.shade500,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

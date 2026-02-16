@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product.dart';
@@ -89,8 +90,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                 return ProductCard(
                   product: provider.products[index],
-                  onTap: () => Navigator.pushNamed(
-                    context,
+                  onTap: () => context.push(
                     '/product/${provider.products[index].id}',
                   ),
                 );

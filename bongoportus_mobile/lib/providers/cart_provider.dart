@@ -53,18 +53,31 @@ class CartProvider extends ChangeNotifier {
       // Reload cart to get fresh data
       await loadCart(userId);
     } catch (e) {
-      _error = e.toString();
+      _error = 'Failed to add item to cart. Please try again.';
       notifyListeners();
     }
   }
 
-  /// Update item quantity
+  /// Update item quantity (optimistic UI — updates instantly, reverts on error)
   Future<void> updateQuantity(String cartItemId, int quantity, String userId) async {
+    // Optimistic: update local state immediately
+    final index = _items.indexWhere((i) => i.id == cartItemId);
+    final oldQuantity = index != -1 ? _items[index].quantity : quantity;
+    if (index != -1) {
+      _items[index].quantity = quantity;
+      notifyListeners();
+    }
+
     try {
       await _cartService.updateQuantity(cartItemId, quantity);
+      // Reload to sync with server state
       await loadCart(userId);
     } catch (e) {
-      _error = e.toString();
+      // Revert on error
+      if (index != -1 && index < _items.length) {
+        _items[index].quantity = oldQuantity;
+      }
+      _error = 'Failed to update quantity. Please try again.';
       notifyListeners();
     }
   }
@@ -72,12 +85,15 @@ class CartProvider extends ChangeNotifier {
   /// Remove item from cart
   Future<void> removeItem(String cartItemId, String userId) async {
     try {
-      await _cartService.removeFromCart(cartItemId);
+      // Optimistic: remove from local state immediately
       _items.removeWhere((item) => item.id == cartItemId);
       notifyListeners();
+
+      await _cartService.removeFromCart(cartItemId);
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      // Revert — reload from server
+      _error = 'Failed to remove item. Please try again.';
+      await loadCart(userId);
     }
   }
 

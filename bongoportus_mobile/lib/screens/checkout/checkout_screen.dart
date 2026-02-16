@@ -92,7 +92,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
 
       final cartItems = cart.items
-          .map((item) => {
+          .map((item) => <String, dynamic>{
                 'productId': item.productId,
                 'variantId': item.variantId,
                 'quantity': item.quantity,

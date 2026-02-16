@@ -32,28 +32,41 @@ class ProductProvider extends ChangeNotifier {
   bool get hasMorePages => _currentPage < _totalPages;
   String? get error => _error;
 
-  /// Load home page data
-  Future<void> loadHomeData() async {
+  /// Load home page data with retry logic
+  Future<void> loadHomeData({int retries = 3}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
-    try {
-      final results = await Future.wait([
-        _productService.getFeaturedProducts(limit: 10),
-        _productService.getNewArrivals(limit: 10),
-        _productService.getCategories(),
-      ]);
+    for (int attempt = 0; attempt < retries; attempt++) {
+      try {
+        final results = await Future.wait([
+          _productService.getFeaturedProducts(limit: 10),
+          _productService.getNewArrivals(limit: 10),
+          _productService.getCategories(),
+        ]);
 
-      _featuredProducts = results[0] as List<Product>;
-      _newArrivals = results[1] as List<Product>;
-      _categories = results[2] as List<Category>;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+        _featuredProducts = results[0] as List<Product>;
+        _newArrivals = results[1] as List<Product>;
+        _categories = results[2] as List<Category>;
+        _error = null;
+        break; // success
+      } catch (e) {
+        _error = e.toString();
+        if (attempt < retries - 1) {
+          // Exponential backoff: 500ms, 1500ms
+          await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
+        }
+      }
     }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Pull-to-refresh home data
+  Future<void> refreshHomeData() async {
+    await loadHomeData(retries: 1);
   }
 
   /// Load products with filters

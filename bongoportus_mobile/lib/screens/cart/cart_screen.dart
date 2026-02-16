@@ -90,12 +90,19 @@ class CartScreen extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(28),
-            decoration: const BoxDecoration(
-              color: AppTheme.surfaceColor,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.primaryColor.withAlpha(20),
+                  AppTheme.primaryColor.withAlpha(6),
+                ],
+              ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.shopping_cart_outlined,
-                size: 64, color: Color(0xFFE0E0E0)),
+            child: Icon(Icons.shopping_cart_outlined,
+                size: 64, color: AppTheme.primaryColor.withAlpha(80)),
           ),
           const SizedBox(height: 24),
           const Text(
@@ -242,16 +249,18 @@ class CartScreen extends StatelessWidget {
 
   Widget _quantityButton(
       {required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceColor,
-          borderRadius: BorderRadius.circular(10),
+    return Material(
+      color: AppTheme.surfaceColor,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        splashColor: AppTheme.primaryColor.withAlpha(30),
+        child: SizedBox(
+          width: 34,
+          height: 34,
+          child: Icon(icon, size: 18, color: AppTheme.secondaryColor),
         ),
-        child: Icon(icon, size: 18, color: AppTheme.secondaryColor),
       ),
     );
   }
@@ -296,11 +305,30 @@ class CartScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 56,
-              child: ElevatedButton(
-                onPressed: () => context.push('/checkout'),
-                child: Text(
-                  'Checkout (${cart.itemCount} items)',
-                  style: const TextStyle(fontSize: 17),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6B35), Color(0xFFFF8A57)],
+                  ),
+                  borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withAlpha(60),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () => context.push('/checkout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: Text(
+                    'Checkout (${cart.itemCount} items)',
+                    style: const TextStyle(fontSize: 17, color: Colors.white),
+                  ),
                 ),
               ),
             ),
