@@ -14,12 +14,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- =====================================================
 
 -- Check if user is admin
-CREATE OR REPLACE FUNCTION is_admin() RETURNS BOOLEAN AS $$
+DROP FUNCTION IF EXISTS is_admin();
+CREATE FUNCTION is_admin() RETURNS BOOLEAN AS $$
   SELECT EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin');
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Check if user is seller
-CREATE OR REPLACE FUNCTION is_seller() RETURNS BOOLEAN AS $$
+DROP FUNCTION IF EXISTS is_seller();
+CREATE FUNCTION is_seller() RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM seller_profiles 
     WHERE user_id = auth.uid() 
@@ -28,7 +30,8 @@ CREATE OR REPLACE FUNCTION is_seller() RETURNS BOOLEAN AS $$
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Check if user owns a product
-CREATE OR REPLACE FUNCTION owns_product(product_id UUID) RETURNS BOOLEAN AS $$
+DROP FUNCTION IF EXISTS owns_product(UUID);
+CREATE FUNCTION owns_product(product_id UUID) RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM products 
     WHERE id = product_id 
@@ -37,7 +40,8 @@ CREATE OR REPLACE FUNCTION owns_product(product_id UUID) RETURNS BOOLEAN AS $$
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Decrement stock after order
-CREATE OR REPLACE FUNCTION decrement_stock() RETURNS TRIGGER AS $$
+DROP FUNCTION IF EXISTS decrement_stock() CASCADE;
+CREATE FUNCTION decrement_stock() RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.variant_id IS NOT NULL THEN
     UPDATE product_variants 
@@ -53,7 +57,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Increment stock on order cancellation
-CREATE OR REPLACE FUNCTION increment_stock() RETURNS TRIGGER AS $$
+DROP FUNCTION IF EXISTS increment_stock() CASCADE;
+CREATE FUNCTION increment_stock() RETURNS TRIGGER AS $$
 BEGIN
   IF OLD.status != 'cancelled' AND NEW.status = 'cancelled' THEN
     UPDATE order_items oi
@@ -68,7 +73,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Increment seller balance on order delivery
-CREATE OR REPLACE FUNCTION increment_seller_balance() RETURNS TRIGGER AS $$
+DROP FUNCTION IF EXISTS increment_seller_balance() CASCADE;
+CREATE FUNCTION increment_seller_balance() RETURNS TRIGGER AS $$
 DECLARE
   v_commission_rate DECIMAL(5,2);
   v_seller_amount DECIMAL(10,2);
@@ -90,7 +96,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+CREATE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
@@ -684,17 +691,19 @@ USING (bucket_id = 'product-images' AND auth.uid()::text = (storage.foldername(n
 
 -- Auto-create profile on user signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
 
-CREATE OR REPLACE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
+CREATE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO profiles (id, email, full_name, avatar_url)
   VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'avatar_url');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 -- Update updated_at column triggers
 DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
@@ -745,9 +754,24 @@ CREATE TRIGGER after_order_delivered
 -- REALTIME SUBSCRIPTIONS
 -- =====================================================
 
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+DO $$
+BEGIN
+  -- Add tables to realtime publication (ignore if already added)
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+END $$;
 
 -- =====================================================
 -- SEED DATA
