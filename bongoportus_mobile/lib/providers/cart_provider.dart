@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import '../models/cart_item.dart';
+import '../services/cart_service.dart';
+
+class CartProvider extends ChangeNotifier {
+  final CartService _cartService = CartService();
+
+  List<CartItem> _items = [];
+  bool _isLoading = false;
+  String? _error;
+
+  List<CartItem> get items => _items;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  int get itemCount => _items.fold(0, (sum, item) => sum + item.quantity);
+  
+  double get subtotal => _items.fold(0, (sum, item) => sum + item.totalPrice);
+  double get shippingCharge => subtotal > 0 ? 50 : 0;
+  double get total => subtotal + shippingCharge;
+  bool get isEmpty => _items.isEmpty;
+
+  /// Load cart items from server
+  Future<void> loadCart(String userId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _items = await _cartService.getCart(userId);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Add item to cart
+  Future<void> addToCart({
+    required String userId,
+    required String productId,
+    int quantity = 1,
+    String? variantId,
+  }) async {
+    try {
+      await _cartService.addToCart(
+        userId: userId,
+        productId: productId,
+        quantity: quantity,
+        variantId: variantId,
+      );
+
+      // Reload cart to get fresh data
+      await loadCart(userId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Update item quantity
+  Future<void> updateQuantity(String cartItemId, int quantity, String userId) async {
+    try {
+      await _cartService.updateQuantity(cartItemId, quantity);
+      await loadCart(userId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Remove item from cart
+  Future<void> removeItem(String cartItemId, String userId) async {
+    try {
+      await _cartService.removeFromCart(cartItemId);
+      _items.removeWhere((item) => item.id == cartItemId);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Clear cart
+  Future<void> clearCart(String userId) async {
+    try {
+      await _cartService.clearCart(userId);
+      _items = [];
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+}

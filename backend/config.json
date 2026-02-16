@@ -1,0 +1,75 @@
+{
+    "name": "bongoportus-backend",
+    "version": "1.0.0",
+    "description": "BongoPortus shared backend configuration - Supabase BaaS",
+    "supabase": {
+        "projectRef": "rgzvlxhimentlidcdvtp",
+        "region": "ap-southeast-1"
+    },
+    "database": {
+        "schema": "database/schema.sql",
+        "tables": [
+            "profiles",
+            "user_addresses",
+            "seller_profiles",
+            "shops",
+            "categories",
+            "brands",
+            "products",
+            "product_images",
+            "product_variants",
+            "cart_items",
+            "coupons",
+            "orders",
+            "order_items",
+            "reviews",
+            "conversations",
+            "messages",
+            "inquiries",
+            "inquiry_messages",
+            "support_tickets",
+            "ticket_messages",
+            "notifications",
+            "banners",
+            "payment_requests"
+        ],
+        "storageBuckets": [
+            {
+                "name": "product-images",
+                "public": true
+            },
+            {
+                "name": "seller-documents",
+                "public": false
+            },
+            {
+                "name": "chat-attachments",
+                "public": false
+            },
+            {
+                "name": "avatars",
+                "public": true
+            }
+        ],
+        "realtimeTables": [
+            "messages",
+            "inquiry_messages",
+            "notifications",
+            "conversations"
+        ]
+    },
+    "clients": {
+        "website": {
+            "path": "../shipementwebsite",
+            "framework": "Vite + React + TypeScript",
+            "supabaseLib": "@supabase/supabase-js",
+            "envPrefix": "VITE_"
+        },
+        "mobile": {
+            "path": "../bongoportus_mobile",
+            "framework": "Flutter",
+            "supabaseLib": "supabase_flutter ^2.3.0",
+            "package": "com.bongoportus.bongoportus_mobile"
+        }
+    }
+}

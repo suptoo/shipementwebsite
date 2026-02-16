@@ -1,0 +1,28 @@
+[project]
+id = "rgzvlxhimentlidcdvtp"
+name = "BongoPortus"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["io.supabase.bongoportus://login-callback", "http://localhost:3000"]
+
+[auth.external.google]
+enabled = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"

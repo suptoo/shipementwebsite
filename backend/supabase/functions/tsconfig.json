@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": [
+            "ESNext",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "strict": false,
+        "noImplicitAny": false,
+        "esModuleInterop": true,
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "types": []
+    },
+    "include": [
+        "_shared/**/*.ts",
+        "_shared/**/*.d.ts",
+        "**/index.ts"
+    ]
+}

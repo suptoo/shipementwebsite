@@ -1,0 +1,42 @@
+name: bongoportus_mobile
+description: BongoPortus - Bangladesh's Premier E-Commerce Marketplace Mobile App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase (single backend for app + web)
+  supabase_flutter: ^2.3.0
+
+  # State Management
+  provider: ^6.1.1
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # UI
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+
+  # Offline-first & caching
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.1
+  connectivity_plus: ^5.0.2
+
+  # Image picker for product inquiry photos
+  image_picker: ^1.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
