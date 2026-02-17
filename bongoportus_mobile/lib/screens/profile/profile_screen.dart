@@ -117,7 +117,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // ── Gradient header ──
+          // ── Premium gradient header ──
           SliverToBoxAdapter(
             child: Container(
               decoration: const BoxDecoration(
@@ -126,105 +126,204 @@ class ProfileScreen extends StatelessWidget {
                   bottom: Radius.circular(32),
                 ),
               ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                  child: Column(
-                    children: [
-                      // Top bar
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Stack(
+                children: [
+                  // Decorative floating circles
+                  Positioned(
+                    top: -20,
+                    right: -30,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withAlpha(8),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: -20,
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withAlpha(6),
+                      ),
+                    ),
+                  ),
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+                      child: Column(
                         children: [
-                          const Text(
-                            'Profile',
-                            style: TextStyle(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Profile',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () =>
+                                    context.push('/profile/edit'),
+                                icon: const Icon(Icons.edit_rounded,
+                                    color: Colors.white70, size: 22),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          // Avatar with gradient border
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppTheme.primaryColor,
+                                  AppTheme.primaryLight,
+                                  Colors.white.withAlpha(60),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 42,
+                              backgroundColor:
+                                  AppTheme.primaryColor.withAlpha(40),
+                              backgroundImage: profile.avatarUrl != null
+                                  ? NetworkImage(profile.avatarUrl!)
+                                  : null,
+                              child: profile.avatarUrl == null
+                                  ? Text(
+                                      profile.displayName[0].toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 34,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            profile.displayName,
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               letterSpacing: -0.3,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => context.push('/profile/edit'),
-                            icon: const Icon(Icons.edit_rounded,
-                                color: Colors.white70, size: 22),
+                          const SizedBox(height: 4),
+                          Text(
+                            profile.email,
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(160),
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (profile.role != 'user') ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(20),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withAlpha(40),
+                                ),
+                              ),
+                              child: Text(
+                                profile.role.toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ],
+                          // Stats row
+                          const SizedBox(height: 18),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(14),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withAlpha(20),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    Icon(Icons.shopping_bag_rounded,
+                                        color: Colors.white.withAlpha(140),
+                                        size: 18),
+                                    const SizedBox(height: 4),
+                                    const Text('-',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700)),
+                                    Text('Orders',
+                                        style: TextStyle(
+                                            color: Colors.white
+                                                .withAlpha(120),
+                                            fontSize: 10)),
+                                  ],
+                                ),
+                                Container(
+                                  height: 30,
+                                  width: 1,
+                                  color: Colors.white.withAlpha(25),
+                                ),
+                                Column(
+                                  children: [
+                                    Icon(Icons.calendar_today_rounded,
+                                        color: Colors.white.withAlpha(140),
+                                        size: 18),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      profile.createdAt != null
+                                          ? '${DateTime.tryParse(profile.createdAt!)?.year ?? '-'}'
+                                          : '-',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                    Text('Member since',
+                                        style: TextStyle(
+                                            color: Colors.white
+                                                .withAlpha(120),
+                                            fontSize: 10)),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      // Avatar
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withAlpha(80),
-                            width: 2,
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 42,
-                          backgroundColor: AppTheme.primaryColor.withAlpha(40),
-                          backgroundImage: profile.avatarUrl != null
-                              ? NetworkImage(profile.avatarUrl!)
-                              : null,
-                          child: profile.avatarUrl == null
-                              ? Text(
-                                  profile.displayName[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 34,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        profile.displayName,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        profile.email,
-                        style: TextStyle(
-                          color: Colors.white.withAlpha(160),
-                          fontSize: 14,
-                        ),
-                      ),
-                      if (profile.role != 'user') ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(20),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withAlpha(40),
-                            ),
-                          ),
-                          child: Text(
-                            profile.role.toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -301,7 +400,8 @@ class ProfileScreen extends StatelessWidget {
                 Center(
                   child: Text(
                     'BongoPortus v1.0.0',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.grey.shade400),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -347,14 +447,15 @@ class ProfileScreen extends StatelessWidget {
                       top: entry.key == 0
                           ? const Radius.circular(18)
                           : Radius.zero,
-                      bottom: isLast ? const Radius.circular(18) : Radius.zero,
+                      bottom: isLast
+                          ? const Radius.circular(18)
+                          : Radius.zero,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 14),
                       child: Row(
                         children: [
-                          // Colored icon container
                           Container(
                             width: 40,
                             height: 40,
@@ -368,7 +469,8 @@ class ProfileScreen extends StatelessWidget {
                           const SizedBox(width: 14),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   item.title,
@@ -475,7 +577,8 @@ class ProfileScreen extends StatelessWidget {
             Text(
               'Are you sure you want to sign out of your account?',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+              style:
+                  TextStyle(color: Colors.grey.shade500, fontSize: 14),
             ),
             const SizedBox(height: 24),
             Row(
@@ -486,7 +589,8 @@ class ProfileScreen extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade200),
+                        side:
+                            BorderSide(color: Colors.grey.shade200),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

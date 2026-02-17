@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Product> _results = [];
   bool _isSearching = false;
   bool _hasSearched = false;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -28,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -88,7 +91,13 @@ class _SearchScreenState extends State<SearchScreen> {
           onSubmitted: _search,
           onChanged: (v) {
             setState(() {});
-            if (v.length >= 2) _search(v);
+            _debounce?.cancel();
+            if (v.length >= 2) {
+              _debounce = Timer(
+                const Duration(milliseconds: 400),
+                () => _search(v),
+              );
+            }
           },
         ),
         actions: [

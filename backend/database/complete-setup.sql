@@ -451,8 +451,26 @@ DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
 CREATE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO profiles (id, email, full_name, avatar_url)
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'avatar_url');
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.email, ''),
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = COALESCE(EXCLUDED.email, profiles.email),
+    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+    avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+    updated_at = NOW();
   RETURN NEW;
+EXCEPTION
+  WHEN unique_violation THEN
+    -- Duplicate id or email — profile already exists, that's fine
+    RETURN NEW;
+  WHEN OTHERS THEN
+    -- NEVER block auth.users creation regardless of what goes wrong
+    RAISE WARNING 'handle_new_user failed for user %: %', NEW.id, SQLERRM;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

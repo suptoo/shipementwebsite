@@ -5,9 +5,37 @@ import '../config/theme.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/offline_banner.dart';
 
-class MainShell extends StatelessWidget {
+class MainShell extends StatefulWidget {
   final Widget child;
   const MainShell({super.key, required this.child});
+
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _fabPulseCtrl;
+  late Animation<double> _fabPulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _fabPulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
+
+    _fabPulse = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _fabPulseCtrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fabPulseCtrl.dispose();
+    super.dispose();
+  }
 
   static int _getSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -27,10 +55,9 @@ class MainShell extends StatelessWidget {
       body: Column(
         children: [
           const OfflineBanner(),
-          Expanded(child: child),
+          Expanded(child: widget.child),
         ],
       ),
-      // Floating action button for quick product inquiry
       floatingActionButton: _buildInquiryFAB(context),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -90,11 +117,27 @@ class MainShell extends StatelessWidget {
   }
 
   Widget _buildInquiryFAB(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () => context.push('/inquiry'),
-      backgroundColor: AppTheme.primaryColor,
-      elevation: 6,
-      child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+    return ScaleTransition(
+      scale: _fabPulse,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: AppTheme.primaryGradient,
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withAlpha(60),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () => context.push('/inquiry'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+        ),
+      ),
     );
   }
 }
@@ -119,51 +162,56 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppTheme.primaryColor.withAlpha(18)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                isActive ? activeIcon : icon,
-                key: ValueKey(isActive),
-                color: isActive ? AppTheme.primaryColor : Colors.grey.shade400,
-                size: 24,
+      child: AnimatedScale(
+        scale: isActive ? 1.08 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive
+                ? AppTheme.primaryColor.withAlpha(18)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  isActive ? activeIcon : icon,
+                  key: ValueKey(isActive),
+                  color:
+                      isActive ? AppTheme.primaryColor : Colors.grey.shade400,
+                  size: 24,
+                ),
               ),
-            ),
-            const SizedBox(height: 3),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                color: isActive ? AppTheme.primaryColor : Colors.grey.shade400,
-                letterSpacing: isActive ? 0 : 0,
+              const SizedBox(height: 3),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                  color:
+                      isActive ? AppTheme.primaryColor : Colors.grey.shade400,
+                ),
+                child: Text(label),
               ),
-              child: Text(label),
-            ),
-            // Active dot indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: const EdgeInsets.only(top: 3),
-              height: 3,
-              width: isActive ? 16 : 0,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(2),
+              // Active gradient dot indicator
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.only(top: 3),
+                height: 3,
+                width: isActive ? 16 : 0,
+                decoration: BoxDecoration(
+                  gradient: isActive ? AppTheme.primaryGradient : null,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

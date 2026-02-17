@@ -36,6 +36,12 @@ void main() async {
   await CacheService.getInstance();
   ConnectivityService.instance; // Initialize connectivity monitoring
 
+  // Global error boundary
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('[BongoPortus] Flutter error: ${details.exception}');
+  };
+
   runApp(
     MultiProvider(
       providers: [

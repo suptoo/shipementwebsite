@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
             ),
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
+              padding: const EdgeInsets.fromLTRB(
                   AppTheme.pagePadding, 16, AppTheme.pagePadding, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
